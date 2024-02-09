@@ -9,9 +9,9 @@ func (r repository) Create(req *dto.CreateTransactionRequest) (*domain.Transacti
 	transaction := new(domain.Transaction)
 
 	err := r.db.QueryRow(
-		`INSERT INTO transactions (amount, type, description, created_at)
+		`INSERT INTO transactions (account_id, amount, type, description, created_at)
      VALUES ($1, $2, $3, $4) RETURNING *`,
-		req.Amount, req.Type, req.Description, "NOW()",
+		req.AccountId, req.Amount, req.Type, req.Description, "NOW()",
 	).Scan(
 		transaction.ID,
 		transaction.Type,

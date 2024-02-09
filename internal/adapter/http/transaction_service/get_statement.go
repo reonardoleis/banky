@@ -7,11 +7,10 @@ import (
 
 	"github.com/valyala/fasthttp"
 
-	"github.com/reonardoleis/banky/internal/core/dto"
 	"github.com/reonardoleis/banky/internal/core/utils"
 )
 
-func (s service) Create(ctx *fasthttp.RequestCtx) {
+func (s service) GetStatement(ctx *fasthttp.RequestCtx) {
 	path := strings.Split(string(ctx.Path()), "/")
 	if len(path) != 3 {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
@@ -26,20 +25,12 @@ func (s service) Create(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	req, err := dto.JsonToCreateTransactionRequest(ctx.PostBody())
+	statement, err := s.usecases.GetStatement(uint(accountId))
 	if err != nil {
-		ctx.SetStatusCode(fasthttp.StatusBadRequest)
-		fmt.Fprintf(ctx, "bad_request")
+		ctx.SetStatusCode(fasthttp.StatusInternalServerError)
+		fmt.Fprintf(ctx, "internal_server_error")
 		return
 	}
 
-	req.AccountId = uint(accountId)
-
-	transaction, err := s.usecases.Create(req)
-	if err != nil {
-		ctx.SetStatusCode(fasthttp.StatusInternalServerError)
-		fmt.Fprint(ctx, "internal_server_error")
-	}
-
-	utils.RespondWithJSON(ctx, transaction.ToJSON())
+	utils.RespondWithJSON(ctx, statement.ToJSON())
 }

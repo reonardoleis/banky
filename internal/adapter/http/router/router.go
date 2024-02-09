@@ -17,7 +17,7 @@ func HandleRoutes(ctx *fasthttp.RequestCtx) {
 	if method == "post" {
 		transactionService.Create(ctx)
 	} else if method == "get" {
-		fmt.Fprintf(ctx, "not_implemented")
+		transactionService.GetStatement(ctx)
 	} else {
 		ctx.SetStatusCode(fasthttp.StatusInternalServerError)
 		fmt.Fprintf(ctx, "internal_server_error")
