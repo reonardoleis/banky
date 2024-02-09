@@ -1,6 +1,6 @@
 package transaction_usecases
 
-import "github.com/reonardoleis/banky/core/domain"
+import "github.com/reonardoleis/banky/internal/core/domain"
 
 type usecase struct {
 	r domain.TransactionRepository

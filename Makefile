@@ -1,11 +1,11 @@
 run-api:
-	go run adapter/http/main.go
+	go run cmd/http/main.go
 
 build-api:
-	go build -o ./bin/api adapter/http/main.go
+	go build -o ./bin/api cmd/http/main.go
 
 run-manager:
-	go run adapter/tcp/main.go
+	go run cmd/tcp/main.go
 
 build-manager:
-	go build -o ./bin/manager adapter/tcp/main.go
+	go build -o ./bin/manager cmd/tcp/main.go

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/reonardoleis/banky/core/domain"
-	"github.com/reonardoleis/banky/core/dto"
+	"github.com/reonardoleis/banky/internal/core/domain"
+	"github.com/reonardoleis/banky/internal/core/dto"
 )
 
 func (u usecase) Create(req *dto.CreateTransactionRequest) (*domain.Transaction, error) {

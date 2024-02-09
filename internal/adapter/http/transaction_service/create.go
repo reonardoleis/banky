@@ -5,8 +5,8 @@ import (
 
 	"github.com/valyala/fasthttp"
 
-	"github.com/reonardoleis/banky/core/dto"
-	"github.com/reonardoleis/banky/core/utils"
+	"github.com/reonardoleis/banky/internal/core/dto"
+	"github.com/reonardoleis/banky/internal/core/utils"
 )
 
 func (s service) Create(ctx *fasthttp.RequestCtx) {

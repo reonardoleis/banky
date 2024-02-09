@@ -6,8 +6,8 @@ import (
 
 	"github.com/valyala/fasthttp"
 
-	"github.com/reonardoleis/banky/adapter/postgres"
-	"github.com/reonardoleis/banky/di"
+	"github.com/reonardoleis/banky/internal/adapter/postgres"
+	"github.com/reonardoleis/banky/internal/di"
 )
 
 func HandleRoutes(ctx *fasthttp.RequestCtx) {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/valyala/fasthttp"
 
-	"github.com/reonardoleis/banky/core/dto"
+	"github.com/reonardoleis/banky/internal/core/dto"
 )
 
 type Transaction struct {
