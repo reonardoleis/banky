@@ -9,3 +9,6 @@ run-manager:
 
 build-manager:
 	go build -o ./bin/manager cmd/tcp/main.go
+
+build-cli:
+	go build -o ./bin/cli cmd/cli/main.go

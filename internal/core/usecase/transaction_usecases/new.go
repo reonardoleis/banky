@@ -6,6 +6,8 @@ type usecase struct {
 	r domain.TransactionRepository
 }
 
-func New(repository domain.TransactionRepository) domain.TransactionUseCases {
+func New(
+	repository domain.TransactionRepository,
+) domain.TransactionUseCases {
 	return &usecase{repository}
 }

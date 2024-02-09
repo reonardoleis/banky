@@ -14,10 +14,10 @@ func main() {
 
 	err := postgres.Connect()
 	if err != nil {
-		log.Fatal("error starting database", err)
+		log.Fatalln("error starting database", err)
 	}
 
 	if err := http.Run(); err != nil {
-		log.Fatal("error running http server", err)
+		log.Fatalln("error running http server", err)
 	}
 }

@@ -7,12 +7,12 @@ import (
 
 	"github.com/valyala/fasthttp"
 
-	"github.com/reonardoleis/banky/internal/core/dto"
 	"github.com/reonardoleis/banky/internal/core/utils"
 )
 
-func (s service) Create(ctx *fasthttp.RequestCtx) {
+func (s service) RequestStatement(ctx *fasthttp.RequestCtx) {
 	path := strings.Split(string(ctx.Path()), "/")
+	path = path[1:]
 	if len(path) != 3 {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 		fmt.Fprintf(ctx, "invalid_path_params")
@@ -26,20 +26,18 @@ func (s service) Create(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	req, err := dto.JsonToCreateTransactionRequest(ctx.PostBody())
+	statement, err := s.usecases.RequestStatement(uint(accountId))
 	if err != nil {
-		ctx.SetStatusCode(fasthttp.StatusBadRequest)
-		fmt.Fprintf(ctx, "bad_request")
+		ctx.SetStatusCode(fasthttp.StatusInternalServerError)
+		fmt.Fprintf(ctx, "internal_server_error")
 		return
 	}
 
-	req.AccountId = uint(accountId)
-
-	transaction, err := s.usecases.Create(req)
-	if err != nil {
-		ctx.SetStatusCode(fasthttp.StatusInternalServerError)
-		fmt.Fprint(ctx, "internal_server_error")
+	if statement == nil {
+		ctx.SetStatusCode(fasthttp.StatusNotFound)
+		fmt.Fprintf(ctx, "account_not_found")
+		return
 	}
 
-	utils.RespondWithJSON(ctx, transaction.ToJSON())
+	utils.RespondWithJSON(ctx, statement.ToJSON())
 }

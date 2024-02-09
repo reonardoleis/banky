@@ -1,27 +1,35 @@
 package transaction_repository
 
 import (
-	"github.com/reonardoleis/banky/internal/core/domain"
+	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/reonardoleis/banky/internal/core/dto"
 )
 
-func (r repository) Create(req *dto.CreateTransactionRequest) (*domain.Transaction, error) {
-	transaction := new(domain.Transaction)
+func (r repository) Create(req []*dto.CreateTransactionRequest) error {
+	query := `INSERT INTO transactions (status, account_id, amount, "type", description, created_at) VALUES `
 
-	err := r.db.QueryRow(
-		`INSERT INTO transactions (account_id, amount, type, description, created_at)
-     VALUES ($1, $2, $3, $4) RETURNING *`,
-		req.AccountId, req.Amount, req.Type, req.Description, "NOW()",
-	).Scan(
-		transaction.ID,
-		transaction.Type,
-		transaction.Amount,
-		transaction.Description,
-		transaction.CreatedAt,
-	)
-	if err != nil {
-		return nil, err
+	for _, transaction := range req {
+		placeholders := fmt.Sprintf("('%d', %d, %d, '%s', '%s', '%s')",
+			transaction.Status,
+			transaction.AccountId,
+			transaction.Amount,
+			transaction.Type,
+			transaction.Description,
+			transaction.Timestamp.Format(time.RFC3339))
+
+		query += placeholders + ","
 	}
 
-	return transaction, nil
+	query = strings.TrimSuffix(query, ",")
+	_, err := r.db.Exec(query)
+	if err != nil {
+		log.Println("transaction repository: error creating transactions", err)
+		return err
+	}
+
+	return nil
 }

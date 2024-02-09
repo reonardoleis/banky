@@ -6,7 +6,7 @@ type service struct {
 	usecases domain.TransactionUseCases
 }
 
-func New(usecases domain.TransactionUseCases) domain.TransactionService {
+func New(usecases domain.TransactionUseCases) domain.TransactionApiService {
 	return &service{
 		usecases: usecases,
 	}

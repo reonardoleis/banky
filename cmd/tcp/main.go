@@ -1,7 +1,21 @@
 package main
 
-import "github.com/reonardoleis/banky/internal/adapter/tcp"
+import (
+	"log"
+
+	"github.com/joho/godotenv"
+
+	"github.com/reonardoleis/banky/internal/adapter/postgres"
+	"github.com/reonardoleis/banky/internal/adapter/tcp"
+)
 
 func main() {
-	tcp.Run()
+	godotenv.Overload(".env")
+	if err := postgres.Connect(); err != nil {
+		log.Fatalln("error starting database", err)
+	}
+
+	if err := tcp.Run(); err != nil {
+		log.Fatalln("error while running tcp adapter", err)
+	}
 }

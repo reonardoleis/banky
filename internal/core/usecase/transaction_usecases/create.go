@@ -1,26 +1,17 @@
 package transaction_usecases
 
 import (
-	"fmt"
-	"time"
+	"log"
 
-	"github.com/reonardoleis/banky/internal/core/domain"
 	"github.com/reonardoleis/banky/internal/core/dto"
 )
 
-func (u usecase) Create(req *dto.CreateTransactionRequest) (*domain.Transaction, error) {
-	//transaction, err := u.r.Create(req)
-	//if err != nil {
-	//	return nil, err
-	//}
+func (u usecase) Create(req []*dto.CreateTransactionRequest) error {
+	err := u.r.Create(req)
+	if err != nil {
+		log.Println("transaction usecase: error creating transaction", err)
+		return err
+	}
 
-	fmt.Printf("transaction_usecases.usecase.Create(%+v)\n", req)
-
-	return &domain.Transaction{
-		ID:          1,
-		Amount:      req.Amount,
-		Type:        req.Type,
-		Description: req.Description,
-		CreatedAt:   time.Now(),
-	}, nil
+	return nil
 }

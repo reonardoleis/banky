@@ -11,13 +11,13 @@ import (
 )
 
 func HandleRoutes(ctx *fasthttp.RequestCtx) {
-	transactionService := di.Transaction(postgres.DB())
+	transactionService := di.TransactionApi(postgres.DB())
 
 	method := strings.ToLower(string(ctx.Method()))
 	if method == "post" {
-		transactionService.Create(ctx)
+		transactionService.DispatchCreation(ctx)
 	} else if method == "get" {
-		transactionService.GetStatement(ctx)
+		transactionService.RequestStatement(ctx)
 	} else {
 		ctx.SetStatusCode(fasthttp.StatusInternalServerError)
 		fmt.Fprintf(ctx, "internal_server_error")
