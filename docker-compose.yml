@@ -68,7 +68,7 @@ services:
       resources:
         limits:
           cpus: '0.6'
-          memory: '170MB'
+          memory: '130MB'
 
   nginx:
     image: nginx:latest
@@ -83,7 +83,7 @@ services:
       resources:
         limits:
           cpus: '0.2'
-          memory: '35MB'
+          memory: '75MB'
   db:
    healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
