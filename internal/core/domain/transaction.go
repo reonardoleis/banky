@@ -10,6 +10,12 @@ import (
 	"github.com/reonardoleis/banky/internal/core/dto"
 )
 
+type Account struct {
+	ID             uint
+	InitialBalance int64
+	Limit          int64
+}
+
 type Transaction struct {
 	ID          uint
 	Type        string
@@ -20,26 +26,10 @@ type Transaction struct {
 	Status      uint8
 }
 
-func (t Transaction) ToJSON() []byte {
-	return []byte(fmt.Sprintf(
-		`{"valor":%d,"tipo":"%s","descricao":"%s"}`,
-		t.Amount,
-		t.Type,
-		t.Description,
-	))
-}
-
 type StatementBalance struct {
 	Total int64
 	Limit int64
 	At    time.Time
-}
-
-func (s StatementBalance) ToJSON() []byte {
-	return []byte(fmt.Sprintf(
-		`{"total":%d,"limite":%d,"data_extrato":"%s"}`,
-		s.Total, s.Limit, s.At.UTC().Format("2006-01-02T15:04:05.000000Z"),
-	))
 }
 
 type StatementTransaction struct {
@@ -49,34 +39,9 @@ type StatementTransaction struct {
 	CreatedAt   time.Time
 }
 
-func (s StatementTransaction) ToJSON() []byte {
-	return []byte(fmt.Sprintf(
-		`{"valor":%d,"tipo":"%s","descricao":"%s","realizada_em":"%s"}`,
-		s.Amount, s.Type, s.Description, s.CreatedAt.UTC().Format("2006-01-02T15:04:05.000000Z"),
-	))
-}
-
 type Statement struct {
 	Balance      *StatementBalance
 	Transactions []*StatementTransaction
-}
-
-func (s Statement) ToJSON() []byte {
-	transactions := "["
-	for i, t := range s.Transactions {
-		transactions += string(t.ToJSON())
-		if i < len(s.Transactions)-1 {
-			transactions += ","
-		}
-	}
-	transactions += "]"
-
-	balance := string(s.Balance.ToJSON())
-
-	return []byte(fmt.Sprintf(
-		`{"saldo":%s,"ultimas_transacoes":%s}`,
-		balance, transactions,
-	))
 }
 
 type TransactionApiService interface {
@@ -97,19 +62,17 @@ type AccountInformation struct {
 	Limit            int64
 }
 
-func (a *AccountInformation) Push(t *Transaction) {
-	if len(a.LastTransactions) == 10 {
-		a.LastTransactions = a.LastTransactions[1:]
-	}
-
-	a.LastTransactions = append(a.LastTransactions, t)
-}
-
 type TransactionUseCases interface {
 	Create(req []*dto.CreateTransactionRequest) error
 	GetStatement(accountId uint, accounts map[uint]*AccountInformation) (*Statement, bool, error)
-	DispatchCreation(req *dto.CreateTransactionRequest) (*dto.CreateTransactionResponse, bool, error)
+	DispatchCreation(
+		req *dto.CreateTransactionRequest,
+	) (*dto.CreateTransactionResponse, bool, error)
 	RequestStatement(accountId uint) (*Statement, error)
+}
+
+type AccountRepository interface {
+	LoadAccounts() (map[uint]*AccountInformation, error)
 }
 
 type TransactionRepository interface {
@@ -122,4 +85,54 @@ type TransactionWorker interface {
 	Enqueue(req *dto.CreateTransactionRequest) (limit int64, balance int64, ok bool, exists bool)
 	GetStatement(accountId uint) (statement *Statement, exists bool, err error)
 	Run() error
+}
+
+// JSON/parsers to entities
+func (a *AccountInformation) Push(t *Transaction) {
+	if len(a.LastTransactions) == 10 {
+		a.LastTransactions = a.LastTransactions[1:]
+	}
+
+	a.LastTransactions = append(a.LastTransactions, t)
+}
+
+func (s Statement) ToJSON() []byte {
+	transactions := "["
+	for i, t := range s.Transactions {
+		transactions += string(t.ToJSON())
+		if i < len(s.Transactions)-1 {
+			transactions += ","
+		}
+	}
+	transactions += "]"
+
+	balance := string(s.Balance.ToJSON())
+
+	return []byte(fmt.Sprintf(
+		`{"saldo":%s,"ultimas_transacoes":%s}`,
+		balance, transactions,
+	))
+}
+
+func (s StatementTransaction) ToJSON() []byte {
+	return []byte(fmt.Sprintf(
+		`{"valor":%d,"tipo":"%s","descricao":"%s","realizada_em":"%s"}`,
+		s.Amount, s.Type, s.Description, s.CreatedAt.UTC().Format("2006-01-02T15:04:05.000000Z"),
+	))
+}
+
+func (s StatementBalance) ToJSON() []byte {
+	return []byte(fmt.Sprintf(
+		`{"total":%d,"limite":%d,"data_extrato":"%s"}`,
+		s.Total, s.Limit, s.At.UTC().Format("2006-01-02T15:04:05.000000Z"),
+	))
+}
+
+func (t Transaction) ToJSON() []byte {
+	return []byte(fmt.Sprintf(
+		`{"valor":%d,"tipo":"%s","descricao":"%s"}`,
+		t.Amount,
+		t.Type,
+		t.Description,
+	))
 }
