@@ -1,31 +1,40 @@
+const zap = @import("zap");
 const std = @import("std");
+const models = @import("models.zig");
+const dto = @import("dto.zig");
 
-pub fn handleDispatchCreation(response: *std.http.Server.Response, allocator: std.mem.Allocator) !void {
-    const body = try response.reader().readAllAlloc(allocator, 8192);
-    defer allocator.free(body);
+pub fn statement(r: zap.Request) void {
+    var it = std.mem.split(u8, r.path.?, "/");
+    _ = it.next();
+    _ = it.next();
+    // var user_id = it.next();
 
-    response.transfer_encoding = .{ .content_length = 8 };
+    var transactions: []models.Transaction = undefined;
+    var response = dto.toStatementResponse(200, 200, transactions);
+    var buf: [256]u8 = undefined;
+    var json_to_send: []const u8 = undefined;
 
-    try response.headers.append("content-type", "text/plain");
-
-    try response.do();
-    if (response.request.method != .HEAD) {
-        try response.writeAll("creation");
-        try response.finish();
+    if (zap.stringifyBuf(&buf, response, .{})) |json| {
+        json_to_send = json;
+    } else {
+        json_to_send = "null";
     }
+
+    r.setContentType(.JSON) catch return;
+    r.sendBody(json_to_send) catch return;
 }
 
-pub fn handleRequestStatement(response: *std.http.Server.Response, allocator: std.mem.Allocator) !void {
-    const body = try response.reader().readAllAlloc(allocator, 8192);
-    defer allocator.free(body);
+pub fn create(r: zap.Request) void {
+    var response = dto.toCreateResponse(200, 200);
+    var buf: [256]u8 = undefined;
+    var json_to_send: []const u8 = undefined;
 
-    response.transfer_encoding = .{ .content_length = 9 };
-
-    try response.headers.append("content-type", "text/plain");
-
-    try response.do();
-    if (response.request.method != .HEAD) {
-        try response.writeAll("statement");
-        try response.finish();
+    if (zap.stringifyBuf(&buf, response, .{})) |json| {
+        json_to_send = json;
+    } else {
+        json_to_send = "null";
     }
+
+    r.setContentType(.JSON) catch return;
+    r.sendBody(json_to_send) catch return;
 }

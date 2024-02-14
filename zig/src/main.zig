@@ -1,4 +1,5 @@
-const runHttpServer = @import("http_server.zig").runHttpServer;
+const http_server = @import("http_server.zig");
+
 pub fn main() !void {
-    try runHttpServer();
+    try http_server.start();
 }
