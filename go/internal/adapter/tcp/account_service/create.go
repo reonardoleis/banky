@@ -7,7 +7,7 @@ import (
 	"github.com/reonardoleis/banky/internal/core/dto"
 )
 
-func (s service) CreateTransaction(conn net.Conn, req *dto.CreateTransactionRequest) {
+func (s service) CreateTransaction(conn net.UDPConn, req *dto.CreateTransactionRequest) {
 	limit, balance, ok, exists := s.worker.Enqueue(req)
 	if !exists {
 		_, err := conn.Write([]byte(ErrAccountNotFound.Error() + "\n"))
