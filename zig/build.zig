@@ -30,12 +30,6 @@ pub fn build(b: *std.Build) void {
         .openssl = false,
     });
 
-    const pg = b.dependency("pg", .{
-        .target = target,
-        .optimize = optimize,
-    });
-
-    exe.addModule("pg", pg.module("pg"));
     exe.addModule("zap", zap.module("zap"));
     exe.linkLibrary(zap.artifact("facil.io"));
 
