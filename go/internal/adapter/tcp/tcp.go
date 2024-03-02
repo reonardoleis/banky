@@ -1,6 +1,7 @@
 package tcp
 
 import (
+	"context"
 	"log"
 	"net"
 
@@ -9,6 +10,7 @@ import (
 	account_worker "github.com/reonardoleis/banky/internal/adapter/tcp/account_worker"
 	"github.com/reonardoleis/banky/internal/adapter/tcp/handler"
 	"github.com/reonardoleis/banky/internal/di"
+	"golang.org/x/sync/semaphore"
 )
 
 func Run() error {
@@ -21,24 +23,20 @@ func Run() error {
 
 	go service.Worker().Run()
 
-	addr, err := net.ResolveUDPAddr("udp", "65000")
-	if err != nil {
-		log.Fatalln("error while resolving udp address", err)
-	}
-
-	listener, err := net.ListenUDP("udp", addr)
+	listener, err := net.Listen("tcp", ":65000")
 	if err != nil {
 		log.Fatalln("error while listening on port 65000", err)
 	}
 
+	sem := semaphore.NewWeighted(50_000)
 	for {
-		var buf [1024]byte
-		_, addr, err := listener.ReadFromUDP(buf[0:])
+		sem.Acquire(context.Background(), 1)
+		conn, err := listener.Accept()
 		if err != nil {
-			log.Println("error while reading from udp", err)
+			log.Println("error while accepting connection", err)
 			continue
 		}
 
-		go handler.Handle(service, buf, listener, addr)
+		go handler.Handle(service, conn, sem)
 	}
 }

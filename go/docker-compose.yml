@@ -1,13 +1,15 @@
 version: '3.5'
 services:
   api1:
+    network_mode: host
     environment:
-      DB_HOST: db
+      DB_HOST: localhost
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: banky
-      MANAGER_ADDR: manager:65000
+      MANAGER_ADDR: localhost:65000
+      APP_PORT: 8080
     image: rxonvrdo/banky
     entrypoint: /bin/sh -c
     command: -c "./app http"
@@ -24,13 +26,15 @@ services:
           memory: '100MB'
 
   api2:
+    network_mode: host
     environment:
-      DB_HOST: db
+      DB_HOST: localhost
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: banky
-      MANAGER_ADDR: manager:65000
+      MANAGER_ADDR: localhost:65000
+      APP_PORT: 8081
     image: rxonvrdo/banky
     entrypoint: /bin/sh -c
     command: -c "./app http"
@@ -39,7 +43,7 @@ services:
       db:
         condition: service_healthy
     expose:
-      - "8080"
+      - "8081"
     deploy:
       resources:
         limits:
@@ -47,9 +51,10 @@ services:
           memory: '100MB'
 
   manager:
+    network_mode: host
     environment:
       IS_QUEUE: "false"
-      DB_HOST: db
+      DB_HOST: localhost
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
@@ -71,6 +76,7 @@ services:
           memory: '155MB'
 
   nginx:
+    network_mode: host
     image: nginx:latest
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
@@ -85,6 +91,7 @@ services:
           cpus: '0.3'
           memory: '115MB'
   db:
+   network_mode: host
    healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 5s

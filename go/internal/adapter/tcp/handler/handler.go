@@ -1,18 +1,28 @@
 package handler
 
 import (
+	"bufio"
 	"log"
 	"net"
 
 	"github.com/reonardoleis/banky/internal/core/domain"
 	"github.com/reonardoleis/banky/internal/core/dto"
+	"golang.org/x/sync/semaphore"
 )
 
-func Handle(s domain.AccountManagerService, message [1024]byte, conn *net.UDPConn, addr *net.UDPAddr) {
-	workerRequest, err := dto.JsonToWorkerRequest([]byte(message[:]))
+func Handle(s domain.AccountManagerService, conn net.Conn, sem *semaphore.Weighted) {
+	defer conn.Close()
+	defer sem.Release(1)
+	message, err := bufio.NewReader(conn).ReadBytes('\n')
+	if err != nil {
+		log.Println("error while handling message", err)
+		return
+	}
+
+	workerRequest, err := dto.JsonToWorkerRequest(message)
 	if err != nil {
 		log.Println("error while parsing worker request", err)
-		_, err := conn.WriteToUDP([]byte(err.Error()+"\n"), addr)
+		_, err := conn.Write([]byte(err.Error() + "\n"))
 		if err != nil {
 			log.Println("error while sending error response", err)
 		}
@@ -24,7 +34,7 @@ func Handle(s domain.AccountManagerService, message [1024]byte, conn *net.UDPCon
 		req, err := workerRequest.ToCreateTransactionRequest()
 		if err != nil {
 			log.Println("error while parsing worker request to create transaction request", err)
-			_, err := conn.WriteToUDP([]byte(err.Error()+"\n"), addr)
+			_, err := conn.Write([]byte(err.Error() + "\n"))
 			if err != nil {
 				log.Println("error while sending error response", err)
 			}
@@ -38,7 +48,7 @@ func Handle(s domain.AccountManagerService, message [1024]byte, conn *net.UDPCon
 		req, err := workerRequest.ToGetStatementRequest()
 		if err != nil {
 			log.Println("error while parsing worker request to get statement", err)
-			_, err := conn.WriteToUDP([]byte(err.Error()+"\n"), addr)
+			_, err := conn.Write([]byte(err.Error() + "\n"))
 			if err != nil {
 				log.Println("error while sending error response", err)
 			}

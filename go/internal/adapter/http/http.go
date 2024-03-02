@@ -1,11 +1,20 @@
 package http
 
 import (
+	"os"
+
 	"github.com/valyala/fasthttp"
 
 	"github.com/reonardoleis/banky/internal/adapter/http/router"
 )
 
 func Run() error {
-	return fasthttp.ListenAndServe(":8080", router.HandleRoutes)
+	port := os.Getenv("APP_PORT")
+	if port == "" {
+		port = ":8080"
+	} else {
+		port = ":" + port
+	}
+
+	return fasthttp.ListenAndServe(port, router.HandleRoutes)
 }
